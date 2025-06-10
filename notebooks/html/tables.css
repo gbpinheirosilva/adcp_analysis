@@ -1,0 +1,5 @@
+/* Very small, tweak to taste */
+table.adcp { font-family: sans-serif; border-collapse: collapse; margin: 1rem 0; }
+table.adcp thead { background:#034f84; color:#fff; }
+table.adcp td, table.adcp th { border:1px solid #ccc; padding:4px 8px; }
+table.adcp tr:nth-child(even){ background:#f7fbff; }
