@@ -1,0 +1,56 @@
+############################
+#  Python / Virtual-env
+############################
+venv/
+.env/
+*.egg-info/
+dist/
+build/
+__pycache__/
+*.py[cod]
+*.so
+*.dylib
+
+############################
+#  Jupyter / Notebooks
+############################
+.ipynb_checkpoints/
+# Autosave/backup notebooks (JupyterLab)
+*.ipynb~ 
+
+############################
+#  Data & Outputs
+############################
+# Raw instrument logs (keep small samples in repo if needed)
+
+# Generated HTML tables & figures
+html/
+# Any temporary exports
+*.png
+*.jpg
+*.svg
+*.pdf
+*.html
+
+############################
+#  VS Code / IDEs
+############################
+.vscode/
+.idea/
+*.code-workspace
+*.swp
+*.swo
+
+############################
+#  OS-specific cruft
+############################
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+############################
+#  Logs
+############################
+*.log
+*.tmp
