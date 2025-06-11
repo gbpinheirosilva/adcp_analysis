@@ -8,6 +8,10 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
+    texlive-xetex \
+    texlive-fonts-recommended \
+    texlive-latex-recommended \
+    pandoc \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements file
