@@ -17,3 +17,7 @@ scipy>=1.10.0
 # Development and utility packages
 ipython>=8.8.0
 jupyterlab>=3.5.0
+
+
+# Optional: For interactive widgets in notebooks
+ipywidgets>=8.0.0
