@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADCP Data Analysis Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .upload-area {
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .upload-area:hover {
+            border-color: #0056b3;
+            background-color: #f8f9fa;
+        }
+        .upload-area.dragover {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+        .results-section {
+            display: none;
+            margin-top: 30px;
+        }
+        .chart-container {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            background-color: #fff;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+        .error-message {
+            display: none;
+            margin: 20px 0;
+        }
+        .plotly-chart {
+            margin: 20px 0;
+        }
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .progress-container {
+            display: none;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1">
+                <i class="fas fa-water"></i> ADCP Data Analysis Dashboard
+            </span>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- File Upload Section -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-upload"></i> Upload ADCP Data File</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="upload-area" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                            <h4>Drop your ADCP file here or click to browse</h4>
+                            <p class="text-muted">Supported formats: .txt, .log, .dat</p>
+                            <input type="file" id="fileInput" accept=".txt,.log,.dat" style="display: none;">
+                        </div>
+                        
+                        <div class="progress-container">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                            </div>
+                            <p class="text-center mt-2">Processing file... This may take a moment.</p>
+                        </div>
+                        
+                        <div class="alert alert-danger error-message" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span id="errorText"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection">
+            <!-- Basic Information -->
+            <div class="row">
+                <div class="col-12">
+                    <h2><i class="fas fa-info-circle"></i> Dataset Overview</h2>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <h5>Aquadopp Records</h5>
+                        <h3 id="aquadoppRecords">-</h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <h5>Signature Records</h5>
+                        <h3 id="signatureRecords">-</h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <h5>Total Bins</h5>
+                        <h3 id="totalBins">-</h3>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <h5>Time Range</h5>
+                        <p id="timeRange">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bin Comparison Analysis -->
+            <div class="chart-container">
+                <h2><i class="fas fa-chart-line"></i> Bin Comparison Analysis</h2>
+                <p>Comparing Aquadopp current meter bin (BIN0) to ADCP first BIN (BIN1)</p>
+                <div class="text-center">
+                    <img id="binComparisonChart" class="img-fluid" alt="Bin Comparison Chart" style="max-width: 100%;">
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6>Valid Data Points</h6>
+                                <div id="validCounts"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Validity Analysis -->
+            <div class="chart-container">
+                <h2><i class="fas fa-check-circle"></i> Data Validity Analysis</h2>
+                <div class="row">
+                    <div class="col-md-8">
+                        <img id="validityHistogram" class="img-fluid" alt="Validity Histogram" style="max-width: 100%;">
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6>Validity Statistics</h6>
+                                <p><strong>Average:</strong> <span id="avgValidity">-</span>%</p>
+                                <p><strong>Minimum:</strong> <span id="minValidity">-</span>%</p>
+                                <p><strong>Maximum:</strong> <span id="maxValidity">-</span>%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive mt-3">
+                    <h6>Detailed Validity Report</h6>
+                    <div id="validityTable"></div>
+                </div>
+            </div>
+
+            <!-- Hourly Analysis -->
+            <div class="chart-container">
+                <h2><i class="fas fa-clock"></i> Hourly Invalid Data Distribution</h2>
+                <p>Analyzing invalid data frequency across different hours of the day</p>
+                <div class="text-center">
+                    <img id="hourlyChart" class="img-fluid" alt="Hourly Analysis Chart" style="max-width: 100%;">
+                </div>
+            </div>
+
+            <!-- Correlation Analysis -->
+            <div class="chart-container">
+                <h2><i class="fas fa-project-diagram"></i> Invalid Data Correlation Analysis</h2>
+                <p>Correlation and co-occurrence of invalid data between bins</p>
+                <div class="row">
+                    <div class="col-md-8">
+                        <img id="correlationHeatmap" class="img-fluid" alt="Correlation Heatmap" style="max-width: 100%;">
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6>Correlation Statistics</h6>
+                                <p><strong>Mean:</strong> <span id="meanCorr">-</span></p>
+                                <p><strong>Maximum:</strong> <span id="maxCorr">-</span></p>
+                                <p><strong>Minimum:</strong> <span id="minCorr">-</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive mt-3">
+                    <h6>Conditional Probability Matrix</h6>
+                    <div id="conditionalProbTable"></div>
+                </div>
+            </div>
+
+            <!-- Interactive Visualizations -->
+            <div class="chart-container">
+                <h2><i class="fas fa-chart-area"></i> Interactive Visualizations</h2>
+                
+                <h5>Speed Comparison (Interactive)</h5>
+                <div id="speed_comparison" class="plotly-chart"></div>
+                
+                <h5>Invalid Data Map</h5>
+                <div id="invalid_data_map" class="plotly-chart"></div>
+            </div>
+
+            <!-- Data Summary -->
+            <div class="chart-container">
+                <h2><i class="fas fa-table"></i> Data Summary Statistics</h2>
+                <div class="table-responsive">
+                    <div id="dataSummary"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.18.1/plotly.min.js"></script>
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const progressContainer = document.querySelector('.progress-container');
+        const errorMessage = document.querySelector('.error-message');
+        const resultsSection = document.getElementById('resultsSection');
+
+        // File upload handling
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            // Validate file type
+            const allowedTypes = ['.txt', '.log', '.dat'];
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!allowedTypes.includes(fileExtension)) {
+                showError('Invalid file type. Please use .txt, .log, or .dat files.');
+                return;
+            }
+
+            // Show progress
+            hideError();
+            progressContainer.style.display = 'block';
+            resultsSection.style.display = 'none';
+
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Upload file
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                progressContainer.style.display = 'none';
+                
+                if (data.success) {
+                    displayResults(data.results);
+                } else {
+                    showError(data.error || 'An error occurred while processing the file.');
+                }
+            })
+            .catch(error => {
+                progressContainer.style.display = 'none';
+                showError('Network error: ' + error.message);
+            });
+        }
+
+        function displayResults(results) {
+            // Basic info
+            document.getElementById('aquadoppRecords').textContent = results.basic_info.aquadopp_records;
+            document.getElementById('signatureRecords').textContent = results.basic_info.signature_records;
+            document.getElementById('totalBins').textContent = results.basic_info.total_bins;
+            document.getElementById('timeRange').innerHTML = `${results.basic_info.time_range.start}<br>to<br>${results.basic_info.time_range.end}`;
+            document.getElementById('dataSummary').innerHTML = results.basic_info.data_summary;
+
+            // Bin comparison
+            document.getElementById('binComparisonChart').src = 'data:image/png;base64,' + results.bin_comparison.plot;
+            let validCountsHTML = '';
+            for (const [bin, count] of Object.entries(results.bin_comparison.valid_counts)) {
+                validCountsHTML += `<p><strong>${bin}:</strong> ${count} points</p>`;
+            }
+            document.getElementById('validCounts').innerHTML = validCountsHTML;
+
+            // Validity analysis
+            document.getElementById('validityHistogram').src = 'data:image/png;base64,' + results.validity_report.histogram;
+            document.getElementById('avgValidity').textContent = results.validity_report.avg_validity.toFixed(1);
+            document.getElementById('minValidity').textContent = results.validity_report.min_validity.toFixed(1);
+            document.getElementById('maxValidity').textContent = results.validity_report.max_validity.toFixed(1);
+            document.getElementById('validityTable').innerHTML = results.validity_report.report_table;
+
+            // Hourly analysis
+            document.getElementById('hourlyChart').src = 'data:image/png;base64,' + results.hourly_analysis.plot;
+
+            // Correlation analysis
+            document.getElementById('correlationHeatmap').src = 'data:image/png;base64,' + results.correlation_analysis.correlation_heatmap;
+            document.getElementById('meanCorr').textContent = results.correlation_analysis.correlation_stats.mean_correlation.toFixed(3);
+            document.getElementById('maxCorr').textContent = results.correlation_analysis.correlation_stats.max_correlation.toFixed(3);
+            document.getElementById('minCorr').textContent = results.correlation_analysis.correlation_stats.min_correlation.toFixed(3);
+            document.getElementById('conditionalProbTable').innerHTML = results.correlation_analysis.conditional_prob_table;
+
+            // Interactive plots
+            document.getElementById('speed_comparison').innerHTML = results.interactive_plots.speed_comparison;
+            document.getElementById('invalid_data_map').innerHTML = results.interactive_plots.invalid_data_map;
+
+            // Show results
+            resultsSection.style.display = 'block';
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showError(message) {
+            document.getElementById('errorText').textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

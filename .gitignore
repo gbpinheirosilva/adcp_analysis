@@ -10,7 +10,7 @@ __pycache__/
 *.py[cod]
 *.so
 *.dylib
-
+*.sh
 ############################
 #  Jupyter / Notebooks
 ############################
@@ -24,6 +24,9 @@ __pycache__/
 # Raw instrument logs (keep small samples in repo if needed)
 
 # Generated HTML tables & figures
+notebooks/html/
+# Generated HTML files from notebooks
+*.html
 html/
 # Any temporary exports
 *.png
@@ -31,6 +34,7 @@ html/
 *.svg
 *.pdf
 *.html
+*.sh
 
 ############################
 #  VS Code / IDEs
@@ -54,3 +58,4 @@ Desktop.ini
 ############################
 *.log
 *.tmp
+*.sh

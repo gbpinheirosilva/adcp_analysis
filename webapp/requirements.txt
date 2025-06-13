@@ -1,0 +1,27 @@
+# Python package requirements for web app
+# Core data science packages
+pandas>=1.5.0
+numpy>=1.24.0
+matplotlib>=3.6.0
+
+# Web framework
+Flask>=2.3.0
+Werkzeug>=2.3.0
+
+# Additional useful packages for data science
+seaborn>=0.12.0
+plotly>=5.12.0
+scipy>=1.10.0
+
+# Development and utility packages
+ipython>=8.8.0
+
+# Jupyter notebook support (optional - for development)
+jupyter>=1.0.0
+notebook>=6.5.0
+ipykernel>=6.20.0
+jupyterlab>=3.5.0
+ipywidgets>=8.0.0
+
+# For production deployment (optional)
+gunicorn>=21.0.0
